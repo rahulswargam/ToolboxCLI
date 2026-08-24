@@ -1,0 +1,39 @@
+# Core CLI (required to launch toolbox.py at all)
+rich
+questionary
+
+# Big block-letter banner (optional — the CLI falls back to a plain title
+# if this isn't installed, or if your terminal is too narrow for it)
+pyfiglet
+
+# Compress Images / Images to PDF
+pillow
+
+# Unlock PDF / Lock PDF / PDF to JPG
+pypdf
+pymupdf
+
+# PDF to Word
+pdf2docx
+
+# Find Duplicates
+send2trash
+
+# YouTube Video Downloader / YouTube to MP3
+yt-dlp
+
+# Instagram Post or Reel Downloader
+instaloader
+
+# Pinterest Post Downloader
+gallery-dl
+
+# NOTE: Video Trimmer and YouTube to MP3 also need the ffmpeg command-line
+# binary on your PATH (this is NOT a pip package):
+#   Windows : winget install Gyan.FFmpeg   (or: choco install ffmpeg)
+#   macOS   : brew install ffmpeg
+#
+# NOTE: file/folder picker popups use tkinter, which ships with the
+# official python.org installer on both Windows and macOS. If you installed
+# Python via Homebrew on macOS and get a tkinter error, run:
+#   brew install python-tk
