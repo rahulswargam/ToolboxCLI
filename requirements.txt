@@ -1,39 +1,33 @@
-# Core CLI (required to launch toolbox.py at all)
-rich
-questionary
+# ── Core UI (required — the dashboard will not start without these) ──────
+textual>=1.0            # TUI framework: screens, CSS theming, widgets
+rich>=13.0              # styled rendering (pulled in by textual, pinned here too)
 
-# Big block-letter banner (optional — the CLI falls back to a plain title
-# if this isn't installed, or if your terminal is too narrow for it)
-pyfiglet
+# ── Image Tools ──────────────────────────────────────────────────────────
+pillow                  # Compress Images, Images to PDF, EXIF date reading
 
-# Compress Images / Images to PDF
-pillow
+# ── PDF Tools ────────────────────────────────────────────────────────────
+pypdf                   # Unlock PDF, Lock PDF
+pymupdf                 # PDF to JPG
+pdf2docx                # PDF to Word
 
-# Unlock PDF / Lock PDF / PDF to JPG
-pypdf
-pymupdf
+# ── Downloaders ──────────────────────────────────────────────────────────
+yt-dlp                  # YouTube Video / YouTube to MP3
+instaloader             # Instagram Post or Reel Downloader
+gallery-dl              # Pinterest Post Downloader
 
-# PDF to Word
-pdf2docx
+# ── Development / tests (optional) ───────────────────────────────────────
+# pytest
+# pytest-asyncio
 
-# Find Duplicates
-send2trash
-
-# YouTube Video Downloader / YouTube to MP3
-yt-dlp
-
-# Instagram Post or Reel Downloader
-instaloader
-
-# Pinterest Post Downloader
-gallery-dl
-
-# NOTE: Video Trimmer and YouTube to MP3 also need the ffmpeg command-line
-# binary on your PATH (this is NOT a pip package):
-#   Windows : winget install Gyan.FFmpeg   (or: choco install ffmpeg)
-#   macOS   : brew install ffmpeg
+# ─────────────────────────────────────────────────────────────────────────
+# NOT pip packages — install these separately if you need the tools listed:
 #
-# NOTE: file/folder picker popups use tkinter, which ships with the
-# official python.org installer on both Windows and macOS. If you installed
-# Python via Homebrew on macOS and get a tkinter error, run:
-#   brew install python-tk
+#   ffmpeg   (Video Trimmer, YouTube to MP3)
+#     Windows : winget install Gyan.FFmpeg     (or: choco install ffmpeg)
+#     macOS   : brew install ffmpeg
+#
+#   tkinter  (native file/folder pickers) ships with the official
+#            python.org installer on both Windows and macOS. Only Homebrew
+#            Python on macOS needs it added:
+#     macOS   : brew install python-tk
+# ─────────────────────────────────────────────────────────────────────────
