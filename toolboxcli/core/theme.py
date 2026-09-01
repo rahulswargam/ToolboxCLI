@@ -56,6 +56,24 @@ CATEGORY_ICONS_ASCII = {
     "Video Tools": ">",
 }
 
+TOOL_ICONS_UNICODE = {
+    "compress_images": "▽",
+    "images_to_pdf": "⇒",
+    "rename_by_date": "↻",
+    "pdf_to_jpg": "▥",
+    "pdf_to_word": "▤",
+    "unlock_pdf": "⊙",
+    "lock_pdf": "⊘",
+    "resize_pdf": "▣",
+    "find_duplicates": "⧉",
+}
+
+TOOL_ICONS_ASCII = {key: "-" for key in TOOL_ICONS_UNICODE}
+
+
+def tool_icons() -> dict:
+    return TOOL_ICONS_UNICODE if supports_unicode() else TOOL_ICONS_ASCII
+
 
 def force_utf8_stdout() -> None:
     """Reconfigure stdout/stderr to UTF-8 where possible.

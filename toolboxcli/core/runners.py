@@ -16,18 +16,13 @@ from __future__ import annotations
 
 import hashlib
 import io
-import re
 import subprocess
-import webbrowser
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from .platform import (
-    is_mac, open_in_file_manager, output_folder, require_binary,
-    require_module, unique_path,
-)
+from .platform import is_mac, output_folder, require_module, unique_path
 
 
 @dataclass
@@ -302,6 +297,100 @@ def run_lock_pdf(file, password="", **_):
     yield Done(f"Locked -> {dest.name}", out)
 
 
+# Quality/scale ladder tried in order until the PDF fits under target, or
+# the ladder runs out (whichever attempt got smallest wins either way).
+_RESIZE_QUALITY_LADDER = (85, 70, 55, 40, 25, 15)
+_RESIZE_SCALE_LADDER = (1.0, 0.75, 0.5, 0.35)
+
+
+def _resize_pdf_attempt(original_bytes: bytes, quality: int, scale: float, fitz) -> bytes:
+    """Recompress every embedded image at (quality, scale) and return the
+    resulting PDF bytes.
+
+    Always rebuilds from the ORIGINAL bytes rather than mutating a shared
+    fitz.Document across attempts: PyMuPDF's replace_image() invalidates the
+    xref it just replaced, so calling it again against a xref captured
+    before an earlier replacement corrupts the document (confirmed while
+    building this — it silently produced a valid-looking but blank PDF)."""
+    from PIL import Image as PILImage
+
+    doc = fitz.open(stream=original_bytes, filetype="pdf")
+    try:
+        for page in doc:
+            for img_info in page.get_images(full=True):
+                xref = img_info[0]
+                base = doc.extract_image(xref)
+                img = PILImage.open(io.BytesIO(base["image"]))
+                if img.mode in ("RGBA", "LA", "P"):
+                    img = img.convert("RGB")
+                if scale < 1.0:
+                    w, h = img.size
+                    img = img.resize(
+                        (max(1, int(w * scale)), max(1, int(h * scale))),
+                        PILImage.LANCZOS,
+                    )
+                buf = io.BytesIO()
+                img.save(buf, format="JPEG", quality=quality, optimize=True)
+                page.replace_image(xref, stream=buf.getvalue())
+        out = io.BytesIO()
+        doc.save(out, garbage=4, deflate=True, clean=True)
+        return out.getvalue()
+    finally:
+        doc.close()
+
+
+def run_resize_pdf(file, target_kb="500", **_):
+    fitz = require_module("fitz", "pymupdf")
+    require_module("PIL", "pillow")
+
+    path = Path(file)
+    try:
+        target = int(str(target_kb).strip() or 500)
+    except ValueError:
+        target = 500
+
+    original = path.read_bytes()
+    before_kb = len(original) / 1024
+    yield Step(f"Resizing {path.name} ({before_kb:.0f} KB) under {target} KB")
+
+    image_count = 0
+    with fitz.open(stream=original, filetype="pdf") as probe:
+        for page in probe:
+            image_count += len(page.get_images(full=True))
+
+    if image_count == 0:
+        raise RuntimeError(
+            "This PDF has no embedded images to recompress — it's likely "
+            "already as small as its text/vector content allows."
+        )
+
+    attempts = [(q, s) for s in _RESIZE_SCALE_LADDER for q in _RESIZE_QUALITY_LADDER]
+    best_bytes, best_kb = original, before_kb
+
+    for i, (quality, scale) in enumerate(attempts, start=1):
+        candidate = _resize_pdf_attempt(original, quality, scale, fitz)
+        candidate_kb = len(candidate) / 1024
+        yield Log(f"quality={quality} scale={scale:.2f} -> {candidate_kb:.0f} KB")
+        yield Progress(i, len(attempts))
+        if candidate_kb < best_kb:
+            best_bytes, best_kb = candidate, candidate_kb
+        if candidate_kb <= target:
+            break
+
+    out = output_folder("Resized PDF")
+    dest = unique_path(out / path.name)
+    dest.write_bytes(best_bytes)
+
+    if best_kb <= target:
+        yield Done(f"{before_kb:.0f} KB -> {best_kb:.0f} KB (under {target} KB target)", out)
+    else:
+        yield Done(
+            f"{before_kb:.0f} KB -> {best_kb:.0f} KB — could not reach {target} KB "
+            f"without visible quality loss; this is the smallest usable result.",
+            out,
+        )
+
+
 # ── File management ───────────────────────────────────────────────────────
 
 def file_hash(path: Path) -> str | None:
@@ -389,112 +478,6 @@ def run_find_duplicates(folder, mode="Quick", **_):
     )
 
 
-# ── Downloaders ───────────────────────────────────────────────────────────
-
-def run_youtube_video(url, folder=None, **_):
-    yt_dlp = require_module("yt_dlp")
-    dest = Path(folder) if folder else output_folder("YouTube Downloads")
-    dest.mkdir(parents=True, exist_ok=True)
-
-    yield Step("Downloading video")
-    opts = {
-        "outtmpl": str(dest / "%(title)s.%(ext)s"),
-        "format": "bv*+ba/b",
-        "merge_output_format": "mp4",
-        "quiet": True,
-        "no_warnings": True,
-    }
-    with yt_dlp.YoutubeDL(opts) as ydl:
-        ydl.download([url])
-    yield Progress(1, 1)
-    yield Done("Download complete", dest)
-
-
-def run_youtube_mp3(url, folder=None, **_):
-    yt_dlp = require_module("yt_dlp")
-    require_binary("ffmpeg")
-    dest = Path(folder) if folder else output_folder("YouTube MP3s")
-    dest.mkdir(parents=True, exist_ok=True)
-
-    yield Step("Downloading and extracting audio")
-    opts = {
-        "outtmpl": str(dest / "%(title)s.%(ext)s"),
-        "format": "bestaudio/best",
-        "quiet": True,
-        "no_warnings": True,
-        "postprocessors": [{
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": "mp3",
-            "preferredquality": "192",
-        }],
-    }
-    with yt_dlp.YoutubeDL(opts) as ydl:
-        ydl.download([url])
-    yield Progress(1, 1)
-    yield Done("MP3 saved", dest)
-
-
-def run_instagram(url, folder=None, **_):
-    instaloader = require_module("instaloader")
-    dest = Path(folder) if folder else output_folder("Instagram Downloads")
-    dest.mkdir(parents=True, exist_ok=True)
-
-    yield Step("Downloading from Instagram")
-    loader = instaloader.Instaloader(
-        dirname_pattern=str(dest),
-        save_metadata=False,
-        download_video_thumbnails=False,
-        post_metadata_txt_pattern="",
-        quiet=True,
-    )
-    match = re.search(r"instagram\.com/(?:p|reel)/([^/?]+)", str(url))
-    if match:
-        post = instaloader.Post.from_shortcode(loader.context, match.group(1))
-        loader.download_post(post, target=dest.name)
-    else:
-        profile = instaloader.Profile.from_username(loader.context, str(url).strip().lstrip("@"))
-        loader.download_profile(profile, profile_pic=False)
-    yield Progress(1, 1)
-    yield Done("Download complete", dest)
-
-
-def run_pinterest(url, folder=None, **_):
-    require_module("gallery_dl")
-    from gallery_dl import config as gdl_config, job as gdl_job
-
-    dest = Path(folder) if folder else output_folder("Pinterest Downloads")
-    dest.mkdir(parents=True, exist_ok=True)
-
-    yield Step("Downloading from Pinterest")
-    gdl_config.set((), "base-directory", str(dest))
-    gdl_job.DownloadJob(str(url)).run()
-    yield Progress(1, 1)
-    yield Done("Download complete", dest)
-
-
-# ── Video tools ───────────────────────────────────────────────────────────
-
-def run_video_trim(file, start="00:00:00", end="", **_):
-    require_binary("ffmpeg")
-    if not end:
-        raise RuntimeError("An end time is required (HH:MM:SS).")
-
-    path = Path(file)
-    out = output_folder("Trimmed Videos")
-    dest = unique_path(out / f"{path.stem}_trimmed{path.suffix}")
-
-    yield Step(f"Trimming {start} -> {end}")
-    yield Progress(0, 1)
-    result = subprocess.run(
-        ["ffmpeg", "-y", "-i", str(path), "-ss", start, "-to", end, "-c", "copy", str(dest)],
-        capture_output=True, text=True,
-    )
-    if result.returncode != 0:
-        raise RuntimeError(f"ffmpeg failed:\n{result.stderr[-600:]}")
-    yield Progress(1, 1)
-    yield Done(f"Saved {dest.name}", out)
-
-
 RUNNERS = {
     "compress_images": run_compress_images,
     "images_to_pdf": run_images_to_pdf,
@@ -503,10 +486,6 @@ RUNNERS = {
     "pdf_to_word": run_pdf_to_word,
     "unlock_pdf": run_unlock_pdf,
     "lock_pdf": run_lock_pdf,
+    "resize_pdf": run_resize_pdf,
     "find_duplicates": run_find_duplicates,
-    "youtube_video": run_youtube_video,
-    "youtube_mp3": run_youtube_mp3,
-    "instagram": run_instagram,
-    "pinterest": run_pinterest,
-    "video_trim": run_video_trim,
 }

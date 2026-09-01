@@ -7,13 +7,17 @@ Screen {
 }
 
 /* ── Header ─────────────────────────────────────────────────────────── */
+/* Height is generous enough for the 4-line pyfiglet banner plus padding;
+   on a narrow terminal AppHeader falls back to a one-line title, which
+   just leaves some empty space here rather than overflowing. */
 #app-header {
-    height: 3;
+    height: 6;
     background: #24283B;
     color: #7AA2F7;
     text-style: bold;
     content-align: center middle;
-    border-bottom: solid #414868;
+    border-top: heavy #BB9AF7;
+    border-bottom: heavy #7AA2F7;
 }
 
 #hint-bar {
@@ -32,11 +36,12 @@ Screen {
 
 /* ── Category sections ──────────────────────────────────────────────── */
 .category-header {
-    height: 1;
+    height: 2;
     color: #FF9E64;
     text-style: bold;
     padding: 0 0 0 1;
     margin: 1 0 0 0;
+    border-bottom: solid #BB9AF7 30%;
 }
 
 /* Rows scroll horizontally so a category with many (or long-named) tools

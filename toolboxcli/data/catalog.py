@@ -98,6 +98,15 @@ CATALOG: tuple[Category, ...] = (
                 InputSpec("password", "Password to set", "password"),
             ),
         ),
+        Tool(
+            "resize_pdf", "Resize PDF",
+            "Shrink a PDF's file size under a target, by recompressing its embedded images.",
+            (
+                InputSpec("file", "Select the PDF to resize", "file",
+                          filetypes=(("PDF files", "*.pdf"),)),
+                InputSpec("target_kb", "Target size (KB)", "text", default="500"),
+            ),
+        ),
     )),
     Category("File Management", (
         Tool(
@@ -108,52 +117,6 @@ CATALOG: tuple[Category, ...] = (
                 InputSpec("mode", "Detection method", "choice",
                           choices=("Quick - name, size & extension",
                                    "Thorough - content hash + Live Photo pairing")),
-            ),
-        ),
-    )),
-    Category("Downloaders", (
-        Tool(
-            "youtube_video", "YouTube Video Downloader",
-            "Download a YouTube video or playlist as MP4.",
-            (
-                InputSpec("url", "YouTube video or playlist URL", "text"),
-                InputSpec("folder", "Where should it be saved?", "folder"),
-            ),
-        ),
-        Tool(
-            "youtube_mp3", "YouTube to MP3",
-            "Extract audio from YouTube as a 192kbps MP3. Requires ffmpeg.",
-            (
-                InputSpec("url", "YouTube video or playlist URL", "text"),
-                InputSpec("folder", "Where should it be saved?", "folder"),
-            ),
-        ),
-        Tool(
-            "instagram", "Instagram Post or Reel Downloader",
-            "Download a public Instagram post or reel.",
-            (
-                InputSpec("url", "Instagram post/reel URL or username", "text"),
-                InputSpec("folder", "Where should it be saved?", "folder"),
-            ),
-        ),
-        Tool(
-            "pinterest", "Pinterest Post Downloader",
-            "Download a Pinterest pin or board.",
-            (
-                InputSpec("url", "Pinterest pin or board URL", "text"),
-                InputSpec("folder", "Where should it be saved?", "folder"),
-            ),
-        ),
-    )),
-    Category("Video Tools", (
-        Tool(
-            "video_trim", "Video Trimmer",
-            "Cut a clip out of a video without re-encoding. Requires ffmpeg.",
-            (
-                InputSpec("file", "Select the video to trim", "file",
-                          filetypes=(("Videos", "*.mp4 *.mov *.mkv *.avi *.m4v"),)),
-                InputSpec("start", "Start time (HH:MM:SS)", "text", default="00:00:00"),
-                InputSpec("end", "End time (HH:MM:SS)", "text"),
             ),
         ),
     )),

@@ -9,21 +9,27 @@ runs. Cross-platform: **Windows and macOS**, same experience on both.
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════╗
-                            RAHUL'S TOOLBOX
-              [↑↓←→] Navigate   [Enter] Select   [Esc] Quit
- DIR ~/Projects/Codes   |   13 tools   |   v2.0.0
+   ___      _        _ _      _____         _ _
+  | _ \__ _| |_ _  _| ( )___ |_   _|__  ___| | |__  _____ __
+  |   / _` | ' \ || | |/(_-<   | |/ _ \/ _ \ | '_ \/ _ \ \ /
+  |_|_\__,_|_||_\_,_|_| /__/   |_|\___/\___/_|_.__/\___/_\_\
 ╚══════════════════════════════════════════════════════════════════════════╝
+  [↑ ↓ ← →] Navigate    [Enter] Select    [Esc] Quit
+  DIR ~/Projects/Codes   |   9 tools   |   v2.0.0
 
 ◆  IMAGE TOOLS
-╔════════════════════╗ ╭───────────────────────────╮ ╭─────────────────────╮
-║ ▶ Compress Images  ║ │   Images to PDF (JPG/PNG) │ │   Rename by Date    │
-╚════════════════════╝ ╰───────────────────────────╯ ╰─────────────────────╯
+╔══════════════════════╗ ╭─────────────────────────────╮ ╭───────────────────────────────────╮
+║ ▶ ▽ Compress Images  ║ │   ⇒ Images to PDF (JPG/PNG) │ │   ↻ Rename Image File Names by Date│
+╚══════════════════════╝ ╰─────────────────────────────╯ ╰───────────────────────────────────╯
 
 ■  PDF TOOLS
-╭──────────────╮ ╭───────────────╮ ╭──────────────╮ ╭─────────────╮
-│  PDF to JPG  │ │  PDF to Word  │ │  Unlock PDF  │ │  Lock PDF   │
-╰──────────────╯ ╰───────────────╯ ╰──────────────╯ ╰─────────────╯
+╭────────────────╮ ╭─────────────────╮ ╭────────────────╮ ╭───────────────╮ ╭──────────────────╮
+│  ▥ PDF to JPG  │ │  ▤ PDF to Word  │ │  ⊙ Unlock PDF  │ │  ⊘ Lock PDF   │ │  ▣ Resize PDF     │
+╰────────────────╯ ╰─────────────────╯ ╰────────────────╯ ╰───────────────╯ ╰──────────────────╯
 ```
+
+*(the real banner is generated live by `pyfiglet` — it only appears when your
+terminal is wide enough, falling back to a plain title otherwise)*
 
 ---
 
@@ -31,11 +37,9 @@ runs. Cross-platform: **Windows and macOS**, same experience on both.
 
 | Category | Tools |
 |---|---|
-| ◆ **Image Tools** | Compress Images · Images to PDF (JPG/PNG) · Rename Image File Names by Date |
-| ■ **PDF Tools** | PDF to JPG · PDF to Word · Unlock PDF · Lock PDF |
-| ▶ **File Management** | Find Duplicates (Files or Photos) |
-| ⬎ **Downloaders** | YouTube Video · YouTube to MP3 · Instagram Post/Reel · Pinterest Post |
-| ▶ **Video Tools** | Video Trimmer |
+| ◆ **Image Tools** | ▽ Compress Images · ⇒ Images to PDF (JPG/PNG) · ↻ Rename Image File Names by Date |
+| ■ **PDF Tools** | ▥ PDF to JPG · ▤ PDF to Word · ⊙ Unlock PDF · ⊘ Lock PDF · ▣ Resize PDF |
+| ▶ **File Management** | ⧉ Find Duplicates (Files or Photos) |
 
 **True 2D navigation.** `↑`/`↓` jump between category rows, `←`/`→` cycle
 through the tools in a row (wrapping at both ends). Moving from a wide row
@@ -68,9 +72,10 @@ Tokyo-Night-inspired, defined once in `toolboxcli/core/theme.py` and
 | Red | `#F7768E` | failures |
 
 **Graceful fallback.** Terminals that can't do UTF-8 box characters get an
-ASCII skin automatically (`+--+`, `>`, `OK`/`X`). Force it with
-`TOOLBOX_ASCII=1`, or disable colour with `NO_COLOR=1`. Running without a
-real TTY prints a readable text summary instead of crashing.
+ASCII skin automatically (`+--+`, `>`, `OK`/`X`) — the figlet banner and every
+tool icon fall back too. Force it with `TOOLBOX_ASCII=1`, or disable colour
+with `NO_COLOR=1`. Running without a real TTY prints a readable text summary
+instead of crashing.
 
 ---
 
@@ -89,15 +94,12 @@ real TTY prints a readable text summary instead of crashing.
 pip install -r requirements.txt
 ```
 
-Two things are **not** pip packages and only matter for specific tools:
+One thing is **not** a pip package: `tkinter` powers the native file/folder
+pickers and ships with the official python.org installer on both platforms.
+Only Homebrew Python on macOS needs it added separately:
 
 ```bash
-# ffmpeg — needed by Video Trimmer and YouTube to MP3
-winget install Gyan.FFmpeg     # Windows
-brew install ffmpeg            # macOS
-
-# tkinter — powers the file pickers. Bundled with python.org installers.
-brew install python-tk         # macOS, only if you use Homebrew Python
+brew install python-tk
 ```
 
 ### 3. Run
@@ -203,20 +205,30 @@ pip install pytest pytest-asyncio
 python -m pytest tests/ -v
 ```
 
-24 tests covering the navigation model (exhaustively — every move from every
+29 tests covering the navigation model (exhaustively — every move from every
 position), catalog/runner integrity, real file round-trips for the image and
-PDF tools, and the live UI driven headlessly through Textual's `Pilot`
-(simulated key presses asserting the right card highlights and the right
-screen opens).
+PDF tools (including a genuine Resize PDF shrink-and-reopen check), and the
+live UI driven headlessly through Textual's `Pilot` (simulated key presses
+asserting the right card highlights and the right screen opens).
 
 ---
 
-## ⚠️ One behaviour change
+## ⚠️ Behaviour notes
 
-**Find Duplicates now reports instead of deleting.** The previous version
-offered to send duplicates to the Recycle Bin. It now lists what it found and
+**Find Duplicates reports instead of deleting.** It lists what it found and
 leaves removal to you — a scan bug that deletes the wrong file is
 unrecoverable, and the report costs one extra step.
+
+**Resize PDF recompresses images, not pages.** It finds every embedded image
+in the PDF and re-encodes it at progressively lower JPEG quality (and, if
+needed, smaller pixel dimensions) until the file fits the target — text and
+vector content are left untouched, so the result stays searchable and crisp.
+A PDF with no embedded images (pure text/vector) is already about as small as
+it can get, and the tool says so rather than pretending to help.
+
+**Downloaders and Video Tools were removed** from this build to keep the
+toolkit focused on local file work. The architecture makes them trivial to
+bring back — see *Adding a new tool* below.
 
 ---
 

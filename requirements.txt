@@ -1,33 +1,23 @@
 # ── Core UI (required — the dashboard will not start without these) ──────
 textual>=1.0            # TUI framework: screens, CSS theming, widgets
 rich>=13.0              # styled rendering (pulled in by textual, pinned here too)
+pyfiglet                # ASCII-art banner in the header
 
 # ── Image Tools ──────────────────────────────────────────────────────────
-pillow                  # Compress Images, Images to PDF, EXIF date reading
+pillow                  # Compress Images, Images to PDF, EXIF date reading, Resize PDF
 
 # ── PDF Tools ────────────────────────────────────────────────────────────
 pypdf                   # Unlock PDF, Lock PDF
-pymupdf                 # PDF to JPG
+pymupdf                 # PDF to JPG, Resize PDF
 pdf2docx                # PDF to Word
-
-# ── Downloaders ──────────────────────────────────────────────────────────
-yt-dlp                  # YouTube Video / YouTube to MP3
-instaloader             # Instagram Post or Reel Downloader
-gallery-dl              # Pinterest Post Downloader
 
 # ── Development / tests (optional) ───────────────────────────────────────
 # pytest
 # pytest-asyncio
 
 # ─────────────────────────────────────────────────────────────────────────
-# NOT pip packages — install these separately if you need the tools listed:
-#
-#   ffmpeg   (Video Trimmer, YouTube to MP3)
-#     Windows : winget install Gyan.FFmpeg     (or: choco install ffmpeg)
-#     macOS   : brew install ffmpeg
-#
-#   tkinter  (native file/folder pickers) ships with the official
-#            python.org installer on both Windows and macOS. Only Homebrew
-#            Python on macOS needs it added:
+# NOT a pip package — tkinter powers the native file/folder pickers and
+# ships with the official python.org installer on both Windows and macOS.
+# Only Homebrew Python on macOS needs it added separately:
 #     macOS   : brew install python-tk
 # ─────────────────────────────────────────────────────────────────────────

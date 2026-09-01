@@ -10,7 +10,6 @@ from __future__ import annotations
 import importlib
 import os
 import platform
-import shutil
 import subprocess
 from pathlib import Path
 
@@ -91,15 +90,6 @@ def require_module(module_name: str, pip_name: str | None = None):
             f"This tool needs the '{pip_name}' package.\n"
             f"Install it with:  pip install {pip_name}"
         ) from exc
-
-
-def require_binary(binary: str) -> None:
-    if shutil.which(binary):
-        return
-    hint = ("winget install Gyan.FFmpeg" if is_windows() else "brew install ffmpeg")
-    raise RuntimeError(
-        f"This tool needs the '{binary}' command on your PATH.\nInstall it with:  {hint}"
-    )
 
 
 # ── Native pickers ────────────────────────────────────────────────────────
