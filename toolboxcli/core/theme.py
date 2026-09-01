@@ -137,5 +137,6 @@ BADGE_OK = "✔" if supports_unicode() else "OK"
 BADGE_FAIL = "✖" if supports_unicode() else "X"
 BADGE_RUNNING = "●" if supports_unicode() else "*"
 
-AUTHOR = "Created & Built by Rahul Swargam"
+AUTHOR = "Rahul Swargam"
 VERSION = "2.0.0"
+LICENSE = "MIT License"

@@ -104,23 +104,48 @@ Input {
 }
 
 Input:focus {
-    border: round #7AA2F7;
+    border: round #BB9AF7;
 }
 
-#step-list {
+/* Choice prompts: an arrow-navigable list instead of typing a number. */
+#prompt-choices {
     height: auto;
     max-height: 10;
-    padding: 0 1;
+    margin: 0 1;
+    background: #24283B;
+    border: round #BB9AF7;
 }
 
-.step-pending { color: #565F89; }
-.step-running { color: #7AA2F7; text-style: bold; }
-.step-done    { color: #9ECE6A; }
-.step-failed  { color: #F7768E; text-style: bold; }
+#prompt-choices > .option-list--option-highlighted {
+    background: #7AA2F7;
+    color: #1A1B26;
+    text-style: bold;
+}
+
+/* Creative loading state: a pulsing indicator plus the current step,
+   replacing a static checklist so a run always feels alive. */
+#loading-area {
+    height: auto;
+    align: center middle;
+    padding: 1 0;
+}
+
+#loading-spinner {
+    height: 3;
+    color: #BB9AF7;
+}
+
+#loading-step {
+    height: 1;
+    content-align: center middle;
+}
 
 ProgressBar {
     margin: 1 1;
 }
+
+Bar > .bar--indeterminate { color: #BB9AF7; }
+PercentageStatus { color: #7AA2F7; text-style: bold; }
 
 Bar > .bar--bar { color: #7AA2F7; }
 Bar > .bar--complete { color: #9ECE6A; }

@@ -370,7 +370,6 @@ def run_resize_pdf(file, target_kb="500", **_):
     for i, (quality, scale) in enumerate(attempts, start=1):
         candidate = _resize_pdf_attempt(original, quality, scale, fitz)
         candidate_kb = len(candidate) / 1024
-        yield Log(f"quality={quality} scale={scale:.2f} -> {candidate_kb:.0f} KB")
         yield Progress(i, len(attempts))
         if candidate_kb < best_kb:
             best_bytes, best_kb = candidate, candidate_kb

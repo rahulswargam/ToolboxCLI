@@ -46,7 +46,7 @@ def _fallback_notice() -> str:
         lines.append(f"  {category.name}:")
         for tool in category.tools:
             lines.append(f"    - {tool.label}")
-    lines += ["", theme.AUTHOR, ""]
+    lines += ["", f"Created & Built by {theme.AUTHOR}", f"{theme.LICENSE}  |  v{theme.VERSION}", ""]
     return "\n".join(lines)
 
 

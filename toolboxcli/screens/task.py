@@ -1,5 +1,6 @@
 """Task Execution Panel: prompts for inputs, then runs the tool with a
-live step list, progress bar, and scrollable log."""
+clean animated loading state, a progress bar, and a log panel that only
+appears if the tool actually has something worth showing."""
 
 from __future__ import annotations
 
@@ -8,47 +9,24 @@ from pathlib import Path
 from textual import work
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Vertical, VerticalScroll
+from textual.containers import Vertical
 from textual.screen import Screen
-from textual.widgets import Input, ProgressBar, RichLog, Static
+from textual.widgets import Input, LoadingIndicator, OptionList, ProgressBar, RichLog, Static
+from textual.widgets.option_list import Option
 
 from ..core import platform as plat
 from ..core import theme
 from ..core.runners import RUNNERS, Done, Log, Progress, Step
 from ..data.catalog import find_tool
 
-
-class StepLine(Static):
-    """One line in the multi-step progress list, with a status badge."""
-
-    def __init__(self, text: str) -> None:
-        super().__init__("", classes="step-pending")
-        self.step_text = text
-        self.state = "pending"
-        self._frame = 0
-
-    def render(self) -> str:
-        if self.state == "running":
-            frames = theme.spinner_frames()
-            badge = frames[self._frame % len(frames)]
-        elif self.state == "done":
-            badge = theme.BADGE_OK
-        elif self.state == "failed":
-            badge = theme.BADGE_FAIL
-        else:
-            badge = theme.BADGE_RUNNING
-        return f"{badge}  {self.step_text}"
-
-    def set_state(self, state: str) -> None:
-        self.state = state
-        self.remove_class("step-pending", "step-running", "step-done", "step-failed")
-        self.add_class(f"step-{state}")
-        self.refresh()
-
-    def tick(self) -> None:
-        if self.state == "running":
-            self._frame += 1
-            self.refresh()
+INPUT_ICONS = {
+    "text": "✎",
+    "password": "⊙",
+    "choice": "▣",
+    "file": "▤",
+    "files": "▤",
+    "folder": "▥",
+}
 
 
 class TaskScreen(Screen):
@@ -63,21 +41,29 @@ class TaskScreen(Screen):
         self.values: dict = {}
         self.input_index = 0
         self.finished = False
-        self._steps: list[StepLine] = []
+        self._has_logs = False
 
     def compose(self) -> ComposeResult:
-        yield Static(f"▶  {self.tool.label}", id="task-title")
+        icon = theme.tool_icons().get(self.tool_key, "•")
+        yield Static(f"▶  {icon}  {self.tool.label}", id="task-title")
         yield Static(self.tool.description, id="task-desc")
+
         yield Static("", id="prompt-label")
         yield Input(id="prompt-input")
-        with VerticalScroll(id="step-list"):
-            pass
+        yield OptionList(id="prompt-choices")
+
+        with Vertical(id="loading-area"):
+            yield LoadingIndicator(id="loading-spinner")
+            yield Static("", id="loading-step")
         yield ProgressBar(id="task-progress", show_eta=False)
         yield RichLog(id="log-panel", markup=True, wrap=True)
         yield Static("", id="result-banner")
 
     def on_mount(self) -> None:
+        self.query_one("#prompt-choices", OptionList).display = False
+        self.query_one("#loading-area", Vertical).display = False
         self.query_one("#task-progress", ProgressBar).display = False
+        self.query_one("#log-panel", RichLog).display = False
         self.query_one("#result-banner", Static).display = False
         self._ask_next_input()
 
@@ -87,6 +73,7 @@ class TaskScreen(Screen):
         specs = self.tool.inputs
         label = self.query_one("#prompt-label", Static)
         field = self.query_one("#prompt-input", Input)
+        choices = self.query_one("#prompt-choices", OptionList)
 
         while self.input_index < len(specs):
             spec = specs[self.input_index]
@@ -131,12 +118,23 @@ class TaskScreen(Screen):
                 self.input_index += 1
                 continue
 
-            # Text-ish input: show the prompt and wait for Enter.
-            hint = ""
+            icon = INPUT_ICONS.get(spec.kind, "▸")
+
             if spec.kind == "choice":
-                options = "  /  ".join(f"[{i+1}] {c}" for i, c in enumerate(spec.choices))
-                hint = f"\n{options}"
-            label.update(f"{spec.prompt}{hint}")
+                field.display = False
+                choices.display = True
+                label.update(f"[bold {theme.MAGENTA}]{icon}  {spec.prompt}[/]")
+                label.display = True
+                choices.clear_options()
+                choices.add_options([Option(c, id=c) for c in spec.choices])
+                choices.focus()
+                choices.highlighted = 0
+                return
+
+            # Plain text-ish input: show the prompt and wait for Enter.
+            field.display = True
+            choices.display = False
+            label.update(f"[bold {theme.MAGENTA}]{icon}  {spec.prompt}[/]")
             field.value = spec.default
             field.password = (spec.kind == "password")
             field.display = True
@@ -153,16 +151,20 @@ class TaskScreen(Screen):
         spec = specs[self.input_index]
         raw = event.value.strip()
 
-        if spec.kind == "choice":
-            # Accept either the number or free text matching a choice.
-            if raw.isdigit() and 1 <= int(raw) <= len(spec.choices):
-                raw = spec.choices[int(raw) - 1]
-            elif not raw:
-                raw = spec.choices[0]
-
         self.values[spec.name] = raw or spec.default
         self.input_index += 1
         event.input.value = ""
+        self._ask_next_input()
+
+    def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
+        specs = self.tool.inputs
+        if self.input_index >= len(specs):
+            return
+        spec = specs[self.input_index]
+        if spec.kind != "choice":
+            return
+        self.values[spec.name] = str(event.option.id)
+        self.input_index += 1
         self._ask_next_input()
 
     # ── Execution ────────────────────────────────────────────────────────
@@ -170,23 +172,14 @@ class TaskScreen(Screen):
     def _start_run(self) -> None:
         self.query_one("#prompt-label", Static).display = False
         self.query_one("#prompt-input", Input).display = False
+        self.query_one("#prompt-choices", OptionList).display = False
+        self.query_one("#loading-area", Vertical).display = True
         self.query_one("#task-progress", ProgressBar).display = True
-        self.set_interval(0.1, self._tick_spinners)
+        self.query_one("#loading-step", Static).update("Starting...")
         self.run_task()
 
-    def _tick_spinners(self) -> None:
-        for step in self._steps:
-            step.tick()
-
-    def _add_step(self, text: str) -> StepLine:
-        for step in self._steps:
-            if step.state == "running":
-                step.set_state("done")
-        line = StepLine(text)
-        self.query_one("#step-list", VerticalScroll).mount(line)
-        line.set_state("running")
-        self._steps.append(line)
-        return line
+    def _set_step(self, text: str) -> None:
+        self.query_one("#loading-step", Static).update(f"[bold {theme.CYAN}]{text}[/]")
 
     @work(thread=True)
     def run_task(self) -> None:
@@ -199,7 +192,7 @@ class TaskScreen(Screen):
         try:
             for event in runner(**self.values):
                 if isinstance(event, Step):
-                    self.app.call_from_thread(self._add_step, event.text)
+                    self.app.call_from_thread(self._set_step, event.text)
                 elif isinstance(event, Progress):
                     self.app.call_from_thread(self._set_progress, event.done, event.total)
                 elif isinstance(event, Log):
@@ -215,31 +208,41 @@ class TaskScreen(Screen):
         bar.progress = done
 
     def _write_log(self, text: str) -> None:
+        # The log panel stays hidden entirely for tools that never emit a Log
+        # event (most of them) — only tools with real reviewable output
+        # (e.g. a list of duplicates found) reveal it, on the first line.
+        if not self._has_logs:
+            self._has_logs = True
+            self.query_one("#log-panel", RichLog).display = True
         self.query_one("#log-panel", RichLog).write(text)
 
+    def _finish_common(self) -> None:
+        self.query_one("#loading-area", Vertical).display = False
+        self.finished = True
+
     def _succeed(self, summary: str, folder=None) -> None:
-        for step in self._steps:
-            if step.state == "running":
-                step.set_state("done")
+        self._finish_common()
         banner = self.query_one("#result-banner", Static)
         banner.remove_class("-fail")
         banner.add_class("-ok")
-        banner.update(f"{theme.BADGE_OK}  {summary}\n\n[Esc] Back to dashboard")
+        banner.update(
+            f"[bold {theme.EMERALD}]{theme.BADGE_OK}  {summary}[/]\n\n"
+            f"[dim]Press[/] [reverse] Esc [/] [dim]to go back to the dashboard[/]"
+        )
         banner.display = True
-        self.finished = True
         if folder:
             plat.open_in_file_manager(Path(folder))
 
     def _fail(self, message: str) -> None:
-        for step in self._steps:
-            if step.state == "running":
-                step.set_state("failed")
+        self._finish_common()
         banner = self.query_one("#result-banner", Static)
         banner.remove_class("-ok")
         banner.add_class("-fail")
-        banner.update(f"{theme.BADGE_FAIL}  {message}\n\n[Esc] Back to dashboard")
+        banner.update(
+            f"[bold {theme.RED}]{theme.BADGE_FAIL}  {message}[/]\n\n"
+            f"[dim]Press[/] [reverse] Esc [/] [dim]to go back to the dashboard[/]"
+        )
         banner.display = True
-        self.finished = True
 
     def action_go_back(self) -> None:
         self.app.pop_screen()

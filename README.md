@@ -50,10 +50,17 @@ never land on nothing.
 real OS dialog — Explorer on Windows, Finder on macOS — rather than making
 you type paths.
 
-**Live task panel.** Each run shows a stepped checklist with `⠋` spinners,
-a `[████████░░] 80%` progress bar, `✔`/`✖` status badges, and a scrollable
-log. Results land in a clearly named Desktop folder that opens automatically
-when the job finishes.
+**Arrow keys everywhere it makes sense.** Multiple-choice prompts (like
+Images to PDF's "combine into one, or one each?") are a real arrow-navigable
+list, not a number you type. Free-text fields — a target size, a password —
+are still typed, because there's nothing to navigate between.
+
+**Live task panel.** A pulsing loading indicator and the current step,
+a `[████████░░] 80%` progress bar, and `✔`/`✖` result badges — clean by
+default. A log panel only appears for tools that actually have something
+worth reviewing (like a list of duplicates found); tools with nothing to
+show don't clutter the screen with one. Results land in a clearly named
+Desktop folder that opens automatically when the job finishes.
 
 ---
 
@@ -205,7 +212,7 @@ pip install pytest pytest-asyncio
 python -m pytest tests/ -v
 ```
 
-29 tests covering the navigation model (exhaustively — every move from every
+30 tests covering the navigation model (exhaustively — every move from every
 position), catalog/runner integrity, real file round-trips for the image and
 PDF tools (including a genuine Resize PDF shrink-and-reopen check), and the
 live UI driven headlessly through Textual's `Pilot` (simulated key presses

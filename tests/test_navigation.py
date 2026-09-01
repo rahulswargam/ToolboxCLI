@@ -159,3 +159,37 @@ async def test_cancelling_the_picker_returns_to_dashboard(monkeypatch):
         await pilot.press("enter")
         await pilot.pause()
         assert isinstance(app.screen, DashboardScreen)
+
+
+@pytest.mark.asyncio
+async def test_choice_prompts_use_an_arrow_navigable_option_list(monkeypatch):
+    """Choice inputs (e.g. Images to PDF's 'how to combine') must be picked
+    with the arrow keys, not by typing a number into a text field."""
+    from textual.widgets import Input, OptionList
+
+    from toolboxcli.core import platform as plat
+    monkeypatch.setattr(plat, "pick_files", lambda *a, **k: [Path("x.jpg")])
+
+    app = ToolboxApp()
+    async with app.run_test(size=(120, 40)) as pilot:
+        await pilot.press("right")  # Images to PDF (JPG/PNG) — has a choice input
+        await pilot.press("enter")
+        await pilot.pause()
+
+        screen = app.screen
+        assert screen.tool.key == "images_to_pdf"
+        assert screen.input_index == 1  # the file picker step already resolved
+
+        choices = screen.query_one("#prompt-choices", OptionList)
+        assert choices.display is True
+        assert screen.query_one("#prompt-input", Input).display is False
+        assert choices.option_count == len(screen.tool.inputs[1].choices)
+        assert choices.highlighted == 0
+
+        await pilot.press("down")
+        assert choices.highlighted == 1
+        await pilot.press("enter")
+        await pilot.pause()
+
+        assert screen.values["mode"] == screen.tool.inputs[1].choices[1]
+        assert screen.input_index == len(screen.tool.inputs)

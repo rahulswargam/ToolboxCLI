@@ -107,9 +107,15 @@ class StatusBar(Static):
 
 
 class FooterCredit(Static):
+    """A colorful credit line: author, a heart, license, and version each
+    in their own accent colour rather than one flat dim string."""
+
     def __init__(self) -> None:
-        super().__init__(
-            f"{theme.AUTHOR}  ·  v{theme.VERSION}",
-            id="footer-credit",
-            markup=False,
+        heart = "❤" if theme.supports_unicode() else "<3"
+        markup = (
+            f"[dim]Created & Built by[/] [bold {theme.CYAN}]{theme.AUTHOR}[/] "
+            f"[{theme.RED}]{heart}[/]   [dim]•[/]   "
+            f"[bold {theme.MAGENTA}]{theme.LICENSE}[/]   [dim]•[/]   "
+            f"[bold {theme.AMBER}]v{theme.VERSION}[/]"
         )
+        super().__init__(markup, id="footer-credit", markup=True)
