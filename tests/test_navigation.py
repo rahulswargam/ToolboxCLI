@@ -162,13 +162,23 @@ async def test_cancelling_the_picker_returns_to_dashboard(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_choice_prompts_use_an_arrow_navigable_option_list(monkeypatch):
+async def test_choice_prompts_use_an_arrow_navigable_option_list(monkeypatch, tmp_path):
     """Choice inputs (e.g. Images to PDF's 'how to combine') must be picked
-    with the arrow keys, not by typing a number into a text field."""
-    from textual.widgets import Input, OptionList
+    with the arrow keys, not by typing a number into a text field.
+
+    Uses a real image file, and waits for the run to actually finish before
+    the test's `async with` block exits — a stubbed nonexistent file left
+    the background worker thread still running (and about to fail) after
+    Textual started tearing the screen down, racing the teardown and
+    intermittently raising NoMatches from inside the worker's own error
+    handler. Confirmed this by reproducing it with a real pytest run."""
+    from PIL import Image
+    from textual.widgets import Input, OptionList, Static
 
     from toolboxcli.core import platform as plat
-    monkeypatch.setattr(plat, "pick_files", lambda *a, **k: [Path("x.jpg")])
+    real_image = tmp_path / "x.jpg"
+    Image.new("RGB", (80, 60), (10, 20, 30)).save(real_image)
+    monkeypatch.setattr(plat, "pick_files", lambda *a, **k: [real_image])
 
     app = ToolboxApp()
     async with app.run_test(size=(120, 40)) as pilot:
@@ -193,3 +203,10 @@ async def test_choice_prompts_use_an_arrow_navigable_option_list(monkeypatch):
 
         assert screen.values["mode"] == screen.tool.inputs[1].choices[1]
         assert screen.input_index == len(screen.tool.inputs)
+
+        for _ in range(50):
+            await pilot.pause(0.05)
+            if screen.finished:
+                break
+        assert screen.finished
+        assert screen.query_one("#result-banner", Static).has_class("-ok")
