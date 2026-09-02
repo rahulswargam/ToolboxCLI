@@ -179,7 +179,8 @@ class TaskScreen(Screen):
         self.run_task()
 
     def _set_step(self, text: str) -> None:
-        self.query_one("#loading-step", Static).update(f"[bold {theme.CYAN}]{text}[/]")
+        badge = theme.badge("Working", theme.PRIMARY)
+        self.query_one("#loading-step", Static).update(f"{badge}  [bold {theme.PRIMARY}]{text}[/]")
 
     @work(thread=True)
     def run_task(self) -> None:
@@ -225,8 +226,9 @@ class TaskScreen(Screen):
         banner = self.query_one("#result-banner", Static)
         banner.remove_class("-fail")
         banner.add_class("-ok")
+        badge = theme.badge("Done", theme.EMERALD)
         banner.update(
-            f"[bold {theme.EMERALD}]{theme.BADGE_OK}  {summary}[/]\n\n"
+            f"{badge}  [bold {theme.EMERALD}]{summary}[/]\n\n"
             f"[dim]Press[/] [reverse] Esc [/] [dim]to go back to the dashboard[/]"
         )
         banner.display = True
@@ -238,8 +240,9 @@ class TaskScreen(Screen):
         banner = self.query_one("#result-banner", Static)
         banner.remove_class("-ok")
         banner.add_class("-fail")
+        badge = theme.badge("Failed", theme.RED)
         banner.update(
-            f"[bold {theme.RED}]{theme.BADGE_FAIL}  {message}[/]\n\n"
+            f"{badge}  [bold {theme.RED}]{message}[/]\n\n"
             f"[dim]Press[/] [reverse] Esc [/] [dim]to go back to the dashboard[/]"
         )
         banner.display = True

@@ -8,19 +8,20 @@ that shows live spinners, progress bars, and streaming logs while your job
 runs. Cross-platform: **Windows and macOS**, same experience on both.
 
 ```
-╔══════════════════════════════════════════════════════════════════════════╗
-   ___      _        _ _      _____         _ _
-  | _ \__ _| |_ _  _| ( )___ |_   _|__  ___| | |__  _____ __
-  |   / _` | ' \ || | |/(_-<   | |/ _ \/ _ \ | '_ \/ _ \ \ /
-  |_|_\__,_|_||_\_,_|_| /__/   |_|\___/\___/_|_.__/\___/_\_\
-╚══════════════════════════════════════════════════════════════════════════╝
+╭──────────────────────────────────────────────────────────────────────────╮
+│    ___      _        _ _      _____         _ _                          │
+│   | _ \__ _| |_ _  _| ( )___ |_   _|__  ___| | |__  _____ __             │
+│   |   / _` | ' \ || | |/(_-<   | |/ _ \/ _ \ | '_ \/ _ \ \ /             │
+│   |_|_\__,_|_||_\_,_|_| /__/   |_|\___/\___/_|_.__/\___/_\_\             │
+╰──────────────────────────────────────────────────────────────────────────╯
   [↑ ↓ ← →] Navigate    [Enter] Select    [Esc] Quit
   DIR ~/Projects/Codes   |   9 tools   |   v2.0.0
 
 ◆  IMAGE TOOLS
-╔══════════════════════╗ ╭─────────────────────────────╮ ╭───────────────────────────────────╮
-║ ▶ ▽ Compress Images  ║ │   ⇒ Images to PDF (JPG/PNG) │ │   ↻ Rename Image File Names by Date│
-╚══════════════════════╝ ╰─────────────────────────────╯ ╰───────────────────────────────────╯
+┌──────────────────────┐ ╭─────────────────────────────╮ ╭───────────────────────────────────╮
+│ ▶ ▽ Compress Images  │ │   ⇒ Images to PDF (JPG/PNG) │ │   ↻ Rename Image File Names by Date│
+└──────────────────────┘ ╰─────────────────────────────╯ ╰───────────────────────────────────╯
+  (shown solid-filled in purple in the real app — Markdown can't render colour)
 
 ■  PDF TOOLS
 ╭────────────────╮ ╭─────────────────╮ ╭────────────────╮ ╭───────────────╮ ╭──────────────────╮
@@ -55,28 +56,34 @@ Images to PDF's "combine into one, or one each?") are a real arrow-navigable
 list, not a number you type. Free-text fields — a target size, a password —
 are still typed, because there's nothing to navigate between.
 
-**Live task panel.** A pulsing loading indicator and the current step,
-a `[████████░░] 80%` progress bar, and `✔`/`✖` result badges — clean by
-default. A log panel only appears for tools that actually have something
-worth reviewing (like a list of duplicates found); tools with nothing to
-show don't clutter the screen with one. Results land in a clearly named
-Desktop folder that opens automatically when the job finishes.
+**Live task panel.** A pulsing loading indicator next to a filled `WORKING`
+pill and the current step, a `[████████░░] 80%` progress bar, and a filled
+`DONE`/`FAILED` pill on the result — clean by default. A log panel only
+appears for tools that actually have something worth reviewing (like a list
+of duplicates found); tools with nothing to show don't clutter the screen
+with one. Results land in a clearly named Desktop folder that opens
+automatically when the job finishes.
 
 ---
 
 ## 🎨 Theme
 
-Tokyo-Night-inspired, defined once in `toolboxcli/core/theme.py` and
-`toolboxcli/theme.tcss`:
+Dracula-inspired, in the Charm/Lip Gloss style — rounded corners everywhere,
+generous padding, filled pill badges (`DONE`, `WORKING`) instead of bare
+glyphs, and no double-line or heavy borders anywhere. Selection is shown with
+a solid colour fill, not a heavier border. Defined once in
+`toolboxcli/core/theme.py` and `toolboxcli/theme.tcss`:
 
 | Token | Colour | Used for |
 |---|---|---|
-| Charcoal | `#1A1B26` | background |
-| Cyan | `#7AA2F7` | cursor / active selection |
-| Amber | `#FF9E64` | section headers |
-| Magenta | `#BB9AF7` | secondary accents, prompts |
-| Emerald | `#9ECE6A` | success / completion |
-| Red | `#F7768E` | failures |
+| Charcoal | `#282A36` | background |
+| Primary | `#BD93F9` | cursor / active selection, header banner |
+| Cyan | `#8BE9FD` | secondary highlight |
+| Amber | `#FFB86C` | section headers, warnings |
+| Magenta | `#FF79C6` | secondary accents, prompts |
+| Emerald | `#50FA7B` | success / completion |
+| Red | `#FF5555` | failures |
+| Dim | `#6272A4` | muted borders, secondary text |
 
 **Graceful fallback.** Terminals that can't do UTF-8 box characters get an
 ASCII skin automatically (`+--+`, `>`, `OK`/`X`) — the figlet banner and every

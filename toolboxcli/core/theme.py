@@ -11,32 +11,35 @@ import os
 import sys
 
 # ── Palette ───────────────────────────────────────────────────────────────
-CHARCOAL = "#1A1B26"
-CHARCOAL_LIGHT = "#24283B"
-CYAN = "#7AA2F7"      # cursor / active selection
-AMBER = "#FF9E64"     # section headers
-MAGENTA = "#BB9AF7"   # secondary accents
-EMERALD = "#9ECE6A"   # success / active execution
-RED = "#F7768E"       # failure
-DIM = "#565F89"
-FOREGROUND = "#C0CAF5"
+# Dracula-inspired. Semantic buckets per the design brief: soft purple/blue
+# for primary UI elements, muted grey for borders/secondary text, soft
+# cyan/green for success, soft red/amber for errors and warnings.
+CHARCOAL = "#282A36"        # background
+CHARCOAL_LIGHT = "#343746"  # panels, inputs, elevated surfaces
+CHARCOAL_DARK = "#21222C"   # recessed surfaces (log panel)
+BORDER = "#44475A"          # default (inactive) borders
+PRIMARY = "#BD93F9"         # cursor / active selection / primary accent
+CYAN = "#8BE9FD"            # secondary highlight
+AMBER = "#FFB86C"           # section headers, warnings
+MAGENTA = "#FF79C6"         # secondary accents (prompts, decoration)
+EMERALD = "#50FA7B"         # success
+RED = "#FF5555"             # errors / failure
+DIM = "#6272A4"             # muted borders / secondary text
+FOREGROUND = "#F8F8F2"
 
 # ── Box drawing ───────────────────────────────────────────────────────────
-# Two sets: the pretty one, and an ASCII-only fallback for terminals that
-# can't render UTF-8 box characters.
+# Rounded corners only — no double-line or heavy borders anywhere in this
+# theme; the active/selected state is conveyed with colour and a filled
+# background instead of a heavier border weight.
 BOX_UNICODE = {
     "tl": "╭", "tr": "╮", "bl": "╰", "br": "╯",
     "h": "─", "v": "│",
-    "tl_active": "╔", "tr_active": "╗", "bl_active": "╚", "br_active": "╝",
-    "h_active": "═", "v_active": "║",
     "cursor": "▶",
 }
 
 BOX_ASCII = {
     "tl": "+", "tr": "+", "bl": "+", "br": "+",
     "h": "-", "v": "|",
-    "tl_active": "+", "tr_active": "+", "bl_active": "+", "br_active": "+",
-    "h_active": "=", "v_active": "|",
     "cursor": ">",
 }
 
@@ -133,9 +136,11 @@ def spinner_frames() -> list[str]:
     return SPINNER_FRAMES_UNICODE if supports_unicode() else SPINNER_FRAMES_ASCII
 
 
-BADGE_OK = "✔" if supports_unicode() else "OK"
-BADGE_FAIL = "✖" if supports_unicode() else "X"
-BADGE_RUNNING = "●" if supports_unicode() else "*"
+def badge(text: str, bg: str, fg: str = CHARCOAL) -> str:
+    """A filled pill/badge label, e.g. badge("done", EMERALD) -> ' DONE '
+    on a solid background — Rich markup, for use inside markup=True widgets."""
+    return f"[on {bg} {fg} bold] {text.upper()} [/]"
+
 
 AUTHOR = "Rahul Swargam"
 VERSION = "2.0.0"

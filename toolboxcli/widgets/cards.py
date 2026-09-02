@@ -14,7 +14,9 @@ class ToolCard(Static):
     The active state is driven by the `active` reactive rather than by focus,
     because navigation is owned by the screen's GridNavigator — the cards are
     purely presentational, which keeps the movement model testable in
-    isolation from Textual.
+    isolation from Textual. Selection is conveyed with a filled background
+    and bold colour rather than a heavier (double-line) border, per the
+    "avoid harsh double-lines" styling brief — see .-active in theme.tcss.
     """
 
     active = reactive(False)
@@ -72,7 +74,10 @@ class AppHeader(Static):
         self.refresh()
 
     def render(self) -> str:
-        width = self.size.width or 80
+        # content_size (not size) — the header now has a border and padding,
+        # so the outer widget size overstates the space actually available
+        # for text before it would wrap.
+        width = self.content_size.width or 80
         banner = _figlet_banner(width)
         return banner if banner else "RAHUL'S TOOLBOX"
 
@@ -87,8 +92,8 @@ class HintBar(Static):
             keys = "Arrow keys"
         markup = (
             f"[reverse] {keys} [/]  [dim]Navigate[/]"
-            f"    [on {theme.CYAN} #1A1B26 bold] Enter [/]  [dim]Select[/]"
-            f"    [on {theme.RED} #1A1B26 bold] Esc [/]  [dim]Quit[/]"
+            f"    [on {theme.PRIMARY} {theme.CHARCOAL} bold] Enter [/]  [dim]Select[/]"
+            f"    [on {theme.RED} {theme.CHARCOAL} bold] Esc [/]  [dim]Quit[/]"
         )
         super().__init__(markup, id="hint-bar", markup=True)
 
