@@ -1,58 +1,48 @@
-/* ToolboxCLI theme — Dracula-inspired, Charm/Lip Gloss style.
+/* ToolboxCLI theme — JobSprint house style.
    Palette lives in core/theme.py; keep these in sync.
 
    Design rules followed throughout:
-   - Rounded corners only (round border) — no double-line or heavy borders.
-   - Generous padding inside every panel/card; clean vertical rhythm between
-     sections via margin, not cramped edge-to-edge content.
-   - Active/selected state is a filled background + bold colour, never a
-     heavier border — a colour/weight difference reads clearly without
-     resorting to double-line borders. */
+   - Plain dark terminal surfaces, never a filled colour panel.
+   - The banner is the one place with a heavy border — double-line violet,
+     matching JobSprint's title box. Every other panel is rounded.
+   - Active/selected state is a cyan border + cyan "»" indicator, never a
+     solid filled background. */
 
 Screen {
-    background: #282A36;
-    color: #F8F8F2;
+    background: #121212;
+    color: #e4e4e4;
 }
 
 /* ── Header ─────────────────────────────────────────────────────────── */
-/* A full rounded card (not just top/bottom rules) around the title,
-   with generous padding — the Lip Gloss "banner box" look. */
+/* The one double-line border in the whole UI — the JobSprint title box. */
 #app-header {
     height: auto;
-    min-height: 6;
-    background: #343746;
-    color: #BD93F9;
+    min-height: 9;
+    background: #121212;
+    color: #d787ff;
     text-style: bold;
     content-align: center middle;
-    border: round #BD93F9;
+    border: double #d787ff;
     padding: 1 2;
     margin: 1 1 0 1;
 }
 
 #hint-bar {
     height: 1;
-    background: #282A36;
-    color: #6272A4;
+    background: #121212;
+    color: #8a8a8a;
     content-align: center middle;
     margin: 1 0;
-}
-
-#status-bar {
-    height: 1;
-    background: #343746;
-    color: #6272A4;
-    padding: 0 2;
-    margin: 0 1;
 }
 
 /* ── Category sections ──────────────────────────────────────────────── */
 .category-header {
     height: 2;
-    color: #FFB86C;
+    color: #00d7ff;
     text-style: bold;
     padding: 0 0 0 2;
     margin: 1 0 0 0;
-    border-bottom: solid #44475A;
+    border-bottom: solid #5f5f5f;
 }
 
 /* Rows scroll horizontally so a category with many (or long-named) tools
@@ -65,8 +55,8 @@ Screen {
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-size-horizontal: 1;
-    scrollbar-color: #44475A;
-    scrollbar-background: #282A36;
+    scrollbar-color: #5f5f5f;
+    scrollbar-background: #121212;
 }
 
 /* ── Tool cards ─────────────────────────────────────────────────────── */
@@ -74,24 +64,24 @@ ToolCard {
     width: auto;
     min-width: 24;
     height: 3;
-    border: round #44475A;
-    color: #F8F8F2;
+    border: round #5f5f5f;
+    color: #e4e4e4;
     content-align: center middle;
     margin: 0 1 0 0;
     padding: 0 2;
 }
 
 ToolCard.-active {
-    border: round #BD93F9;
-    color: #282A36;
+    border: round #00d7ff;
+    color: #00d7ff;
     text-style: bold;
-    background: #BD93F9;
+    background: #121212;
 }
 
 /* ── Task screen ────────────────────────────────────────────────────── */
 #task-title {
     height: 1;
-    color: #BD93F9;
+    color: #d787ff;
     text-style: bold;
     padding: 0 2;
     margin: 1 0 0 0;
@@ -99,26 +89,26 @@ ToolCard.-active {
 
 #task-desc {
     height: auto;
-    color: #6272A4;
+    color: #8a8a8a;
     padding: 0 2 1 2;
 }
 
 #prompt-label {
     height: auto;
-    color: #FF79C6;
+    color: #00d7ff;
     padding: 1 2 0 2;
 }
 
 Input {
     margin: 0 2;
-    background: #343746;
-    color: #F8F8F2;
-    border: round #44475A;
+    background: #1c1c1c;
+    color: #e4e4e4;
+    border: round #5f5f5f;
     padding: 0 1;
 }
 
 Input:focus {
-    border: round #FF79C6;
+    border: round #00d7ff;
 }
 
 /* Choice prompts: an arrow-navigable list instead of typing a number. */
@@ -126,14 +116,14 @@ Input:focus {
     height: auto;
     max-height: 10;
     margin: 0 2;
-    background: #343746;
-    border: round #FF79C6;
+    background: #1c1c1c;
+    border: round #00d7ff;
     padding: 0 1;
 }
 
 #prompt-choices > .option-list--option-highlighted {
-    background: #BD93F9;
-    color: #282A36;
+    background: #1c1c1c;
+    color: #00d7ff;
     text-style: bold;
 }
 
@@ -147,7 +137,7 @@ Input:focus {
 
 #loading-spinner {
     height: 3;
-    color: #FF79C6;
+    color: #00d7ff;
 }
 
 #loading-step {
@@ -159,18 +149,18 @@ ProgressBar {
     margin: 1 2;
 }
 
-Bar > .bar--indeterminate { color: #FF79C6; }
-PercentageStatus { color: #BD93F9; text-style: bold; }
+Bar > .bar--indeterminate { color: #00d7ff; }
+PercentageStatus { color: #d787ff; text-style: bold; }
 
-Bar > .bar--bar { color: #BD93F9; }
-Bar > .bar--complete { color: #50FA7B; }
+Bar > .bar--bar { color: #d787ff; }
+Bar > .bar--complete { color: #5fd75f; }
 
 #log-panel {
     height: 1fr;
     min-height: 6;
-    border: round #44475A;
-    background: #21222C;
-    color: #F8F8F2;
+    border: round #5f5f5f;
+    background: #0a0a0a;
+    color: #e4e4e4;
     margin: 1 2;
     padding: 1 2;
 }
@@ -180,23 +170,23 @@ Bar > .bar--complete { color: #50FA7B; }
     padding: 1 2;
     margin: 1 2;
     text-style: bold;
-    border: round #44475A;
+    border: round #5f5f5f;
 }
 
 #result-banner.-ok {
-    color: #50FA7B;
-    border: round #50FA7B;
+    color: #5fd75f;
+    border: round #5fd75f;
 }
 
 #result-banner.-fail {
-    color: #FF5555;
-    border: round #FF5555;
+    color: #ff5f5f;
+    border: round #ff5f5f;
 }
 
 #footer-credit {
     height: 1;
-    color: #6272A4;
+    color: #8a8a8a;
     content-align: center middle;
-    background: #343746;
+    background: #121212;
     margin: 1 1 1 1;
 }

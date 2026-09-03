@@ -11,30 +11,29 @@ import os
 import sys
 
 # ── Palette ───────────────────────────────────────────────────────────────
-# Dracula-inspired. Semantic buckets per the design brief: soft purple/blue
-# for primary UI elements, muted grey for borders/secondary text, soft
-# cyan/green for success, soft red/amber for errors and warnings.
-CHARCOAL = "#282A36"        # background
-CHARCOAL_LIGHT = "#343746"  # panels, inputs, elevated surfaces
-CHARCOAL_DARK = "#21222C"   # recessed surfaces (log panel)
-BORDER = "#44475A"          # default (inactive) borders
-PRIMARY = "#BD93F9"         # cursor / active selection / primary accent
-CYAN = "#8BE9FD"            # secondary highlight
-AMBER = "#FFB86C"           # section headers, warnings
-MAGENTA = "#FF79C6"         # secondary accents (prompts, decoration)
-EMERALD = "#50FA7B"         # success
-RED = "#FF5555"             # errors / failure
-DIM = "#6272A4"             # muted borders / secondary text
-FOREGROUND = "#F8F8F2"
+# JobSprint house style: violet brand accent + cyan interaction accent over
+# plain terminal-dark surfaces — no filled colour panels. Selection is shown
+# with a bold cyan indicator and border, never a solid background fill.
+CHARCOAL = "#121212"        # background
+CHARCOAL_LIGHT = "#1c1c1c"  # panels, inputs, elevated surfaces
+CHARCOAL_DARK = "#0a0a0a"   # recessed surfaces (log panel)
+BORDER = "grey37"           # default (inactive) borders
+BRAND = "#d787ff"           # violet — headings, outer double-line borders
+ACCENT = "#00d7ff"          # cyan — prompts, selection, active indicators
+MUTED = "grey54"            # help text, footers, inactive items
+OK = "#5fd75f"               # success
+WARN = "#ffaf5f"             # warnings
+BAD = "#ff5f5f"              # errors / failure
+FOREGROUND = "#e4e4e4"
 
 # ── Box drawing ───────────────────────────────────────────────────────────
-# Rounded corners only — no double-line or heavy borders anywhere in this
-# theme; the active/selected state is conveyed with colour and a filled
-# background instead of a heavier border weight.
+# Rounded corners everywhere except the banner (double-line, JobSprint
+# style); the active/selected state is conveyed with a cyan border and the
+# "»" indicator rather than a heavier border weight or a filled background.
 BOX_UNICODE = {
     "tl": "╭", "tr": "╮", "bl": "╰", "br": "╯",
     "h": "─", "v": "│",
-    "cursor": "▶",
+    "cursor": "»",
 }
 
 BOX_ASCII = {
@@ -136,10 +135,17 @@ def spinner_frames() -> list[str]:
     return SPINNER_FRAMES_UNICODE if supports_unicode() else SPINNER_FRAMES_ASCII
 
 
-def badge(text: str, bg: str, fg: str = CHARCOAL) -> str:
-    """A filled pill/badge label, e.g. badge("done", EMERALD) -> ' DONE '
-    on a solid background — Rich markup, for use inside markup=True widgets."""
-    return f"[on {bg} {fg} bold] {text.upper()} [/]"
+def badge(text: str, color: str) -> str:
+    """An outlined status label, e.g. badge("done", OK) -> '● DONE' in colour
+    with no filled background — Rich markup, for use inside markup=True
+    widgets."""
+    return f"[bold {color}]● {text.upper()}[/]"
+
+
+def key_hint(key: str, label: str) -> str:
+    """A muted keybinding hint, e.g. 'Enter select' with the key in the
+    accent colour and the label muted — no reverse-video or filled block."""
+    return f"[bold {ACCENT}]{key}[/] [{MUTED}]{label}[/]"
 
 
 AUTHOR = "Rahul Swargam"

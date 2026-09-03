@@ -8,29 +8,36 @@ that shows live spinners, progress bars, and streaming logs while your job
 runs. Cross-platform: **Windows and macOS**, same experience on both.
 
 ```
-╭──────────────────────────────────────────────────────────────────────────╮
-│    ___      _        _ _      _____         _ _                          │
-│   | _ \__ _| |_ _  _| ( )___ |_   _|__  ___| | |__  _____ __             │
-│   |   / _` | ' \ || | |/(_-<   | |/ _ \/ _ \ | '_ \/ _ \ \ /             │
-│   |_|_\__,_|_||_\_,_|_| /__/   |_|\___/\___/_|_.__/\___/_\_\             │
-╰──────────────────────────────────────────────────────────────────────────╯
+╔══════════════════════════════════════════════════════════════════════════╗
+║    ___      _        _ _      _____         _ _                          ║
+║   | _ \__ _| |_ _  _| ( )___ |_   _|__  ___| | |__  _____ __             ║
+║   |   / _` | ' \ || | |/(_-<   | |/ _ \/ _ \ | '_ \/ _ \ \ /             ║
+║   |_|_\__,_|_||_\_,_|_| /__/   |_|\___/\___/_|_.__/\___/_\_\             ║
+║                                                                            ║
+║                     Developer & Utility Toolkit                          ║
+║                                                                            ║
+║                      Created by Rahul Swargam                            ║
+╚══════════════════════════════════════════════════════════════════════════╝
   [↑ ↓ ← →] Navigate    [Enter] Select    [Esc] Quit
-  DIR ~/Projects/Codes   |   9 tools   |   v2.0.0
 
 ◆  IMAGE TOOLS
 ┌──────────────────────┐ ╭─────────────────────────────╮ ╭───────────────────────────────────╮
-│ ▶ ▽ Compress Images  │ │   ⇒ Images to PDF (JPG/PNG) │ │   ↻ Rename Image File Names by Date│
+│ » ▽ Compress Images  │ │   ⇒ Images to PDF (JPG/PNG) │ │   ↻ Rename Image File Names by Date│
 └──────────────────────┘ ╰─────────────────────────────╯ ╰───────────────────────────────────╯
-  (shown solid-filled in purple in the real app — Markdown can't render colour)
+  (shown with a cyan outline in the real app — Markdown can't render colour)
 
 ■  PDF TOOLS
 ╭────────────────╮ ╭─────────────────╮ ╭────────────────╮ ╭───────────────╮ ╭──────────────────╮
 │  ▥ PDF to JPG  │ │  ▤ PDF to Word  │ │  ⊙ Unlock PDF  │ │  ⊘ Lock PDF   │ │  ▣ Resize PDF     │
 ╰────────────────╯ ╰─────────────────╯ ╰────────────────╯ ╰───────────────╯ ╰──────────────────╯
+
+                              MIT License  •  v2.0.0
 ```
 
-*(the real banner is generated live by `pyfiglet` — it only appears when your
-terminal is wide enough, falling back to a plain title otherwise)*
+*(the real banner is generated live by `pyfiglet`, split two-tone across
+"RAHUL'S" and "TOOLBOX" — it only appears when your terminal is wide enough,
+falling back to a plain title otherwise. Directory and tool count aren't
+shown anywhere; license and version appear once, at the very bottom.)*
 
 ---
 
@@ -68,22 +75,22 @@ automatically when the job finishes.
 
 ## 🎨 Theme
 
-Dracula-inspired, in the Charm/Lip Gloss style — rounded corners everywhere,
-generous padding, filled pill badges (`DONE`, `WORKING`) instead of bare
-glyphs, and no double-line or heavy borders anywhere. Selection is shown with
-a solid colour fill, not a heavier border. Defined once in
-`toolboxcli/core/theme.py` and `toolboxcli/theme.tcss`:
+JobSprint house style — violet brand accent, cyan interaction accent, plain
+dark terminal surfaces with no filled colour panels. Rounded borders
+everywhere except the title banner, which uses a double-line violet border.
+Selection is shown with a cyan border and a `»` indicator, never a solid
+colour fill. Defined once in `toolboxcli/core/theme.py` and
+`toolboxcli/theme.tcss`:
 
 | Token | Colour | Used for |
 |---|---|---|
-| Charcoal | `#282A36` | background |
-| Primary | `#BD93F9` | cursor / active selection, header banner |
-| Cyan | `#8BE9FD` | secondary highlight |
-| Amber | `#FFB86C` | section headers, warnings |
-| Magenta | `#FF79C6` | secondary accents, prompts |
-| Emerald | `#50FA7B` | success / completion |
-| Red | `#FF5555` | failures |
-| Dim | `#6272A4` | muted borders, secondary text |
+| Charcoal | `#121212` | background |
+| Brand | `#d787ff` | headings, banner border, author credit |
+| Accent | `#00d7ff` | cursor / active selection, prompts, hint keys |
+| Muted | `grey54` | help text, footers, inactive items |
+| OK | `#5fd75f` | success / completion |
+| Warn | `#ffaf5f` | warnings |
+| Bad | `#ff5f5f` | failures |
 
 **Graceful fallback.** Terminals that can't do UTF-8 box characters get an
 ASCII skin automatically (`+--+`, `>`, `OK`/`X`) — the figlet banner and every
@@ -154,7 +161,7 @@ toolboxcli/
 │   └── task.py            # Task Execution Panel
 │
 └── widgets/
-    └── cards.py           # ToolCard, AppHeader, StatusBar, FooterCredit
+    └── cards.py           # ToolCard, AppHeader, HintBar, FooterCredit
 ```
 
 **Two design decisions worth knowing:**

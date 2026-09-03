@@ -123,7 +123,7 @@ class TaskScreen(Screen):
             if spec.kind == "choice":
                 field.display = False
                 choices.display = True
-                label.update(f"[bold {theme.MAGENTA}]{icon}  {spec.prompt}[/]")
+                label.update(f"[bold {theme.ACCENT}]{icon}  {spec.prompt}[/]")
                 label.display = True
                 choices.clear_options()
                 choices.add_options([Option(c, id=c) for c in spec.choices])
@@ -134,7 +134,7 @@ class TaskScreen(Screen):
             # Plain text-ish input: show the prompt and wait for Enter.
             field.display = True
             choices.display = False
-            label.update(f"[bold {theme.MAGENTA}]{icon}  {spec.prompt}[/]")
+            label.update(f"[bold {theme.ACCENT}]{icon}  {spec.prompt}[/]")
             field.value = spec.default
             field.password = (spec.kind == "password")
             field.display = True
@@ -179,8 +179,8 @@ class TaskScreen(Screen):
         self.run_task()
 
     def _set_step(self, text: str) -> None:
-        badge = theme.badge("Working", theme.PRIMARY)
-        self.query_one("#loading-step", Static).update(f"{badge}  [bold {theme.PRIMARY}]{text}[/]")
+        badge = theme.badge("Working", theme.ACCENT)
+        self.query_one("#loading-step", Static).update(f"{badge}  [bold {theme.ACCENT}]{text}[/]")
 
     @work(thread=True)
     def run_task(self) -> None:
@@ -226,10 +226,10 @@ class TaskScreen(Screen):
         banner = self.query_one("#result-banner", Static)
         banner.remove_class("-fail")
         banner.add_class("-ok")
-        badge = theme.badge("Done", theme.EMERALD)
+        badge = theme.badge("Done", theme.OK)
         banner.update(
-            f"{badge}  [bold {theme.EMERALD}]{summary}[/]\n\n"
-            f"[dim]Press[/] [reverse] Esc [/] [dim]to go back to the dashboard[/]"
+            f"{badge}  [bold {theme.OK}]{summary}[/]\n\n"
+            f"[{theme.MUTED}]Press[/] {theme.key_hint('Esc', 'to go back to the dashboard')}"
         )
         banner.display = True
         if folder:
@@ -240,10 +240,10 @@ class TaskScreen(Screen):
         banner = self.query_one("#result-banner", Static)
         banner.remove_class("-ok")
         banner.add_class("-fail")
-        badge = theme.badge("Failed", theme.RED)
+        badge = theme.badge("Failed", theme.BAD)
         banner.update(
-            f"{badge}  [bold {theme.RED}]{message}[/]\n\n"
-            f"[dim]Press[/] [reverse] Esc [/] [dim]to go back to the dashboard[/]"
+            f"{badge}  [bold {theme.BAD}]{message}[/]\n\n"
+            f"[{theme.MUTED}]Press[/] {theme.key_hint('Esc', 'to go back to the dashboard')}"
         )
         banner.display = True
 

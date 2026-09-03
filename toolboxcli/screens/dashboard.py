@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import HorizontalScroll, VerticalScroll
@@ -12,8 +10,8 @@ from textual.widgets import Static
 
 from ..core import theme
 from ..core.navigation import GridNavigator
-from ..data.catalog import CATALOG, TOTAL_TOOLS
-from ..widgets.cards import AppHeader, FooterCredit, HintBar, StatusBar, ToolCard
+from ..data.catalog import CATALOG
+from ..widgets.cards import AppHeader, FooterCredit, HintBar, ToolCard
 
 
 class CardRow(HorizontalScroll):
@@ -51,7 +49,6 @@ class DashboardScreen(Screen):
     def compose(self) -> ComposeResult:
         yield AppHeader()
         yield HintBar()
-        yield StatusBar(self._status_text())
 
         with VerticalScroll(id="grid-body"):
             icons = theme.category_icons()
@@ -66,17 +63,6 @@ class DashboardScreen(Screen):
 
     def on_mount(self) -> None:
         self._refresh_active()
-
-    def _status_text(self) -> str:
-        cwd = Path.cwd()
-        home = Path.home()
-        try:
-            shown = "~/" + str(cwd.relative_to(home)).replace("\\", "/")
-        except ValueError:
-            shown = str(cwd)
-        if len(shown) > 46:
-            shown = "..." + shown[-43:]
-        return f"DIR {shown}   |   {TOTAL_TOOLS} tools   |   v{theme.VERSION}"
 
     def _cards(self) -> list[ToolCard]:
         return list(self.query(ToolCard))
