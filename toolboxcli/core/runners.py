@@ -288,7 +288,7 @@ def run_lock_pdf(file, password="", **_):
     for i, page in enumerate(reader.pages, start=1):
         writer.add_page(page)
         yield Progress(i, len(reader.pages))
-    writer.encrypt(password)
+    writer.encrypt(password, algorithm="AES-256")
 
     out = output_folder("Locked PDF")
     dest = unique_path(out / path.name)
@@ -316,9 +316,13 @@ def _resize_pdf_attempt(original_bytes: bytes, quality: int, scale: float, fitz)
 
     doc = fitz.open(stream=original_bytes, filetype="pdf")
     try:
+        processed = set()
         for page in doc:
             for img_info in page.get_images(full=True):
                 xref = img_info[0]
+                if xref in processed:
+                    continue
+                processed.add(xref)
                 base = doc.extract_image(xref)
                 img = PILImage.open(io.BytesIO(base["image"]))
                 if img.mode in ("RGBA", "LA", "P"):

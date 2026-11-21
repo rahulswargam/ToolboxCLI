@@ -1,0 +1,10 @@
+* text=auto
+*.py text eol=lf
+*.pyw text eol=lf
+*.md text eol=lf
+*.ps1 text eol=crlf
+*.png binary
+*.ico binary
+*.bmp binary
+# Preserve upstream license bytes, including their original whitespace.
+assets/licenses/* -text whitespace=-blank-at-eol,-blank-at-eof

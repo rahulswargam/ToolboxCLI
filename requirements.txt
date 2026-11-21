@@ -7,7 +7,7 @@ pyfiglet                # ASCII-art banner in the header
 pillow                  # Compress Images, Images to PDF, EXIF date reading, Resize PDF
 
 # ── PDF Tools ────────────────────────────────────────────────────────────
-pypdf                   # Unlock PDF, Lock PDF
+pypdf[crypto]           # Unlock PDF, AES-256 Lock PDF
 pymupdf                 # PDF to JPG, Resize PDF
 pdf2docx                # PDF to Word
 

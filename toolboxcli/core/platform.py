@@ -11,7 +11,11 @@ import importlib
 import os
 import platform
 import subprocess
+from contextvars import ContextVar
 from pathlib import Path
+
+# Desktop workers can choose an output directory without changing CLI behavior.
+OUTPUT_ROOT: ContextVar[Path | None] = ContextVar("output_root", default=None)
 
 
 def is_windows() -> bool:
@@ -45,7 +49,7 @@ def get_desktop_path() -> Path:
 
 
 def output_folder(name: str) -> Path:
-    folder = get_desktop_path() / name
+    folder = (OUTPUT_ROOT.get() or get_desktop_path()) / name
     folder.mkdir(parents=True, exist_ok=True)
     return folder
 
